@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
+import './index.css'
 import phoneService from './services/phones'
+import Notification from './components/Notification'
 
 const Search = ({ query, onChange }) => {
   return (
@@ -58,6 +60,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
+  const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState(null)
   
   useEffect(() => {
     phoneService
@@ -96,6 +100,18 @@ const App = () => {
         .update(existingPerson.id, personObject)
         .then(returnedPerson => {
           setPersons(persons.map(person => person.id === returnedPerson.id ? returnedPerson : person))
+          setMessage(`${returnedPerson.name}'s number was changed.`)
+          setMessageType('success')
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
+        })
+        .catch(error => {
+          setMessage(`Information of ${existingPerson.name} has already been removed from the server`)
+          setMessageType('error')
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
         })
       }
       return
@@ -125,6 +141,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} type={messageType}/>
       <Search query={search} onChange={handleSearchChange}/>
       <h2>Add a new</h2>
       <Add
